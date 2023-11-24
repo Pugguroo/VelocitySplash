@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Velocity UK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    /* Add styles for video and container */
+    body,
+    html {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Poppins', sans-serif; /* Use Poppins font */
+    }
+
+    .section--yellow {
+      position: relative;
+      text-align: center;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    .video-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); /* Adjust darkness here */
+      z-index: 0;
+    }
+
+    .title {
+      font-size: 3em;
+      margin: 0;
+      text-transform: uppercase;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+    }
+
+    .coming-soon {
+      font-size: 1.2em;
+      position: absolute;
+      top: 53%; /* Adjust the percentage to position it closer */
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+    }
+
+    .countdown {
+      font-size: 1.5em;
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+    }
+
+    /* Add this CSS for the custom cursor */
+    body {
+      cursor: url('custom-cursor.png'), auto;
+    }
+
+    /* Updated volume slider styles */
+    .volume-slider {
+      position: absolute;
+      top: 50%;
+      right: 20px; /* Adjust right distance */
+      transform: translate(0, -50%);
+      width: 10px;
+      height: 100px;
+      background-color: rgba(255, 255, 255, 0.5);
+      border-radius: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      pointer-events: none;
+    }
+
+    .volume-level {
+      width: 100%;
+      background-color: #fff;
+      transition: height 0.2s ease-in-out;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="section section--yellow">
+    <!-- Add video here -->
+    <video autoplay muted loop class="video-background">
+      <source src="video.mp4" type="video/mp4">
+      <!-- Add additional video sources if needed for different formats -->
+      Your browser does not support the video tag.
+    </video>
+    <!-- Dark overlay -->
+    <div class="overlay"></div>
+    <!-- Text content -->
+    <h1 class="title">Velocity UK</h1>
+    <!-- Coming Soon -->
+    <div class="coming-soon">Coming Soon...</div>
+    <!-- Countdown -->
+    <div class="countdown" id="countdown"></div>
+    <!-- Volume slider -->
+    <div class="volume-slider" id="volumeSlider">
+      <div class="volume-level" id="volumeLevel"></div>
+    </div>
+
+    <!-- Script for Audio Playback and Volume Adjustment -->
+    <script>
+      let volumeSlider = document.getElementById('volumeSlider');
+      let audio;
+
+      function hideVolumeSlider() {
+        volumeSlider.style.opacity = '0';
+      }
+
+      function showVolumeSlider() {
+        volumeSlider.style.opacity = '1';
+        setTimeout(hideVolumeSlider, 2000); // Hide after 2 seconds of inactivity
+      }
+
+      function updateVolumeLevel() {
+        var volumeLevel = document.getElementById('volumeLevel');
+        volumeLevel.style.height = (audio.volume * 100) + '%';
+      }
+
+      window.addEventListener('DOMContentLoaded', (event) => {
+        // Set the date we're counting down to (December 15, 2023)
+        var countDownDate = new Date("December 15, 2023 00:00:00").getTime();
+
+        // Update the countdown every 1 second
+        var x = setInterval(function () {
+          // Get the current date and time
+          var now = new Date().getTime();
+          // Calculate the time remaining between now and the countdown date
+          var distance = countDownDate - now;
+          // Calculate days, hours, minutes, and seconds
+          var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+          var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+          // Display the countdown
+          document.getElementById("countdown").innerHTML = "Countdown: " + days + "d " + hours + "h " +
+            minutes + "m " + seconds + "s ";
+          // If the countdown is over, display a message
+          if (distance < 0) {
+            clearInterval(x);
+            document.getElementById("countdown").innerHTML = "EXPIRED";
+          }
+        }, 1000);
+
+        // Play the audio and set the volume after the DOM content is loaded
+        audio = new Audio('music.mp3');
+        audio.loop = true;
+        audio.volume = 0.3; // Initial volume (0.0 to 1.0)
+        audio.play().catch(function (error) {
+          // Audio playback failed - handle error
+          console.error('Audio playback failed:', error);
+        });
+
+        // Adjust volume using the scroll wheel
+        window.addEventListener('wheel', function (e) {
+          e.preventDefault();
+          var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+          audio.volume = Math.max(0, Math.min(1, audio.volume + (delta * 0.1))); // Adjust volume step (0.1)
+          updateVolumeLevel();
+          showVolumeSlider();
+        });
+
+        // Update the volume slider initially
+        updateVolumeLevel();
+        showVolumeSlider();
+      });
+
+      // Hide the volume slider initially
+      hideVolumeSlider();
+    </script>
+  </div>
+</body>
+
+</html>
