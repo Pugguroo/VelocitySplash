@@ -175,10 +175,13 @@
         }, 1000);
 
         // Play the audio and set the volume after the DOM content is loaded
-        audio = new Audio('music.mp3');
+        audio = new Audio();
+        audio.src = 'music.mp3';
         audio.loop = true;
         audio.volume = 0.3; // Initial volume (0.0 to 1.0)
-        audio.play().catch(function (error) {
+        audio.play().then(function () {
+          // Audio playback started successfully
+        }).catch(function (error) {
           // Audio playback failed - handle error
           console.error('Audio playback failed:', error);
         });
